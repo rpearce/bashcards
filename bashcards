@@ -31,7 +31,7 @@ declare -A German=(
   ["We are very happy"]="Wir sind sehr glücklich"
 )
 
-function run_cards() {
+function run_cards {
   clear
 
   local group_name=$1
@@ -77,7 +77,7 @@ function run_cards() {
   run_cards $group_name "$(declare -p updated_group)"
 }
 
-function select_group() {
+function select_group {
   clear
   echo "What would you like to practice?"
 
@@ -98,13 +98,13 @@ function select_group() {
   # make sure the option is in
   # the list and then continue
   if [ $opt -gt 0 ] && [ $opt -lt $((${#groups[@]} + 1)) ]; then
-    run_cards "${groups[0]}" "$(declare -p ${groups[$opt-1]})"
+    run_cards "${groups[$opt-1]}" "$(declare -p ${groups[$opt-1]})"
   else
     select_group "(Please select from the options)"
   fi
 }
 
-function start() {
+function start {
   select_group
 }
 
