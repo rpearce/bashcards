@@ -7,20 +7,28 @@ set -eou pipefail
 declare -a langs=(
   "Spanish"
   "Swedish"
+  "German"
 )
 
-declare -A spanish=(
+declare -A Spanish=(
   ["Goodbye"]="Adiós"
   ["Hello"]="Hola"
   ["I love you"]="Te quiero"
   ["We are very happy"]="Nos alegra muchísimo"
 )
 
-declare -A swedish=(
+declare -A Swedish=(
   ["Goodbye"]="Adjö"
   ["Hello"]="Hallå"
   ["I love you"]="Jag älskar dig"
   ["We are very happy"]="Vi är väldigt lyckliga"
+)
+
+declare -A German=(
+  ["Goodbye"]="Auf Wiedersehen"
+  ["Hello"]="Hallo"
+  ["I love you"]="Ich liebe dich"
+  ["We are very happy"]="Wir sind sehr glücklich"
 )
 
 function run_cards() {
@@ -89,12 +97,8 @@ function select_language() {
 
   # make sure the option is in
   # the list and then continue
-  #if [ $opt -gt 0 ] && [ $opt -lt $((${#langs[@]} + 1)) ]; then
-  #  run_cards "${langs[$opt-1]}"
-  if [ $opt = "1" ]; then
-    run_cards "${langs[0]}" "$(declare -p spanish)"
-  elif [ $opt = "2" ]; then
-    run_cards "${langs[1]}" "$(declare -p swedish)"
+  if [ $opt -gt 0 ] && [ $opt -lt $((${#langs[@]} + 1)) ]; then
+    run_cards "${langs[0]}" "$(declare -p ${langs[$opt-1]})"
   else
     select_language "(Please select from the options)"
   fi
