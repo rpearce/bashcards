@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -eou pipefail
 
-declare -a langs=(
+declare -a groups=(
   "Spanish"
   "Swedish"
   "German"
@@ -34,21 +34,21 @@ declare -A German=(
 function run_cards() {
   clear
 
-  local lang_name=$1
-  eval "local -A lang="${2#*=}
-  local -A updated_lang
+  local group_name=$1
+  eval "local -A group="${2#*=}
+  local -A updated_group
 
-  local lang_keys=("${!lang[@]}")
-  local lang_key_count=${#lang_keys[@]}
-  local random_lang_key_index="$[$RANDOM % $lang_key_count]"
-  local random_lang_key="${lang_keys[$random_lang_key_index]}"
+  local group_keys=("${!group[@]}")
+  local group_key_count=${#group_keys[@]}
+  local random_group_key_index="$[$RANDOM % $group_key_count]"
+  local random_group_key="${group_keys[$random_group_key_index]}"
 
-  local selected_key_val=("$random_lang_key" "${lang[$random_lang_key]}")
+  local selected_key_val=("$random_group_key" "${group[$random_group_key]}")
   local random_selected_index="$[$RANDOM % 2]"
   local random_selected_key_or_val="${selected_key_val[$random_selected_index]}"
 
-  # print language name
-  echo "$lang_name"
+  # print group name
+  echo "$group_name"
   echo ""
 
   # print front
@@ -59,13 +59,13 @@ function run_cards() {
   # print back
   echo ${selected_key_val[@]/$random_selected_key_or_val}
 
-  for key in "${!lang[@]}"; do
-    if [ "$key" != "$random_lang_key" ]; then
-      updated_lang["$key"]="${lang[$key]}"
+  for key in "${!group[@]}"; do
+    if [ "$key" != "$random_group_key" ]; then
+      updated_group["$key"]="${group[$key]}"
     fi
   done
 
-  if [ ! -v updated_lang[@] ]; then
+  if [ ! -v updated_group[@] ]; then
     echo ""
     echo "All done!"
     read -p "(Press return to exit)" _
@@ -74,16 +74,16 @@ function run_cards() {
     read -p "(Press return for next card)" _
   fi
 
-  run_cards $lang_name "$(declare -p updated_lang)"
+  run_cards $group_name "$(declare -p updated_group)"
 }
 
-function select_language() {
+function select_group() {
   clear
-  echo "What language would you like to practice?"
+  echo "What would you like to practice?"
 
-  # list the languages
-  for i in "${!langs[@]}"; do
-    echo "$((i+1)). ${langs[$i]}"
+  # list the groups
+  for i in "${!groups[@]}"; do
+    echo "$((i+1)). ${groups[$i]}"
   done
 
   # if there's a feedback message,
@@ -97,15 +97,15 @@ function select_language() {
 
   # make sure the option is in
   # the list and then continue
-  if [ $opt -gt 0 ] && [ $opt -lt $((${#langs[@]} + 1)) ]; then
-    run_cards "${langs[0]}" "$(declare -p ${langs[$opt-1]})"
+  if [ $opt -gt 0 ] && [ $opt -lt $((${#groups[@]} + 1)) ]; then
+    run_cards "${groups[0]}" "$(declare -p ${groups[$opt-1]})"
   else
-    select_language "(Please select from the options)"
+    select_group "(Please select from the options)"
   fi
 }
 
 function start() {
-  select_language
+  select_group
 }
 
 start
