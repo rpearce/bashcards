@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -eou pipefail
+
+declare -a langs=(
+  "Spanish"
+  "Swedish"
+)
+
+declare -A spanish=(
+  ["Goodbye"]="Adiós"
+  ["Hello"]="Hola"
+  ["I love you"]="Te quiero"
+  ["We are very happy"]="Nos alegra muchísimo"
+)
+
+declare -A swedish=(
+  ["Goodbye"]="Adjö"
+  ["Hello"]="Hallå"
+  ["I love you"]="Jag älskar dig"
+  ["We are very happy"]="Vi är väldigt lyckliga"
+)
+
+function run_cards() {
+  clear
+
+  local lang_name=$1
+  eval "local -A lang="${2#*=}
+  local -A updated_lang
+
+  local lang_keys=("${!lang[@]}")
+  local lang_key_count=${#lang_keys[@]}
+  local random_lang_key_index="$[$RANDOM % $lang_key_count]"
+  local random_lang_key="${lang_keys[$random_lang_key_index]}"
+
+  local selected_key_val=("$random_lang_key" "${lang[$random_lang_key]}")
+  local random_selected_index="$[$RANDOM % 2]"
+  local random_selected_key_or_val="${selected_key_val[$random_selected_index]}"
+
+  # print language name
+  echo "$lang_name"
+  echo ""
+
+  # print front
+  echo $random_selected_key_or_val
+
+  read -p "(Press return to flip)" _
+
+  # print back
+  echo ${selected_key_val[@]/$random_selected_key_or_val}
+
+  for key in "${!lang[@]}"; do
+    if [ "$key" != "$random_lang_key" ]; then
+      updated_lang["$key"]="${lang[$key]}"
+    fi
+  done
+
+  if [ ! -v updated_lang[@] ]; then
+    echo ""
+    echo "All done!"
+    read -p "(Press return to exit)" _
+    exit 0
+  else
+    read -p "(Press return for next card)" _
+  fi
+
+  run_cards $lang_name "$(declare -p updated_lang)"
+}
+
+function select_language() {
+  clear
+  echo "What language would you like to practice?"
+
+  # list the languages
+  for i in "${!langs[@]}"; do
+    echo "$((i+1)). ${langs[$i]}"
+  done
+
+  # if there's a feedback message,
+  # display that (like an error)
+  if [ "$*" ]; then
+    echo $1
+  fi
+
+  # get the input
+  read -p "> " opt
+
+  # make sure the option is in
+  # the list and then continue
+  #if [ $opt -gt 0 ] && [ $opt -lt $((${#langs[@]} + 1)) ]; then
+  #  run_cards "${langs[$opt-1]}"
+  if [ $opt = "1" ]; then
+    run_cards "${langs[0]}" "$(declare -p spanish)"
+  elif [ $opt = "2" ]; then
+    run_cards "${langs[1]}" "$(declare -p swedish)"
+  else
+    select_language "(Please select from the options)"
+  fi
+}
+
+function start() {
+  select_language
+}
+
+start
