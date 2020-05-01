@@ -80,6 +80,7 @@ function run_cards {
   read -p "(Press return to flip)" _
 
   # print back
+  echo ""
   printf '–%.0s' $(seq 1 $back_hborder_length)
   echo ""
   printf "|"
