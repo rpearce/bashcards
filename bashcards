@@ -45,19 +45,56 @@ function run_cards {
 
   local selected_key_val=("$random_group_key" "${group[$random_group_key]}")
   local random_selected_index="$[$RANDOM % 2]"
-  local random_selected_key_or_val="${selected_key_val[$random_selected_index]}"
+
+  local front="${selected_key_val[$random_selected_index]}"
+  local front_length=${#front}
+  local front_hborder_length=$(( $front_length + 6 ))
+  local front_vborder_length=$(( $front_length + 4 ))
+
+  local back="${selected_key_val[$(( $random_selected_index == 0 ? 1 : 0))]}"
+  local back_length=${#back}
+  local back_hborder_length=$(( $back_length + 6 ))
+  local back_vborder_length=$(( $back_length + 4 ))
 
   # print group name
   echo "$group_name"
   echo ""
 
   # print front
-  echo $random_selected_key_or_val
+  printf '–%.0s' $(seq 1 $front_hborder_length)
+  echo ""
+  printf "|"
+  printf ' %.0s' $(seq 1 $front_vborder_length)
+  printf "|"
+  echo ""
+
+  echo "|  $front  |"
+
+  printf "|"
+  printf ' %.0s' $(seq 1 $front_vborder_length)
+  printf "|"
+  echo ""
+  printf '–%.0s' $(seq 1 $front_hborder_length)
+  echo ""
 
   read -p "(Press return to flip)" _
 
   # print back
-  echo ${selected_key_val[@]/$random_selected_key_or_val}
+  printf '–%.0s' $(seq 1 $back_hborder_length)
+  echo ""
+  printf "|"
+  printf ' %.0s' $(seq 1 $back_vborder_length)
+  printf "|"
+  echo ""
+
+  echo "|  $back  |"
+
+  printf "|"
+  printf ' %.0s' $(seq 1 $back_vborder_length)
+  printf "|"
+  echo ""
+  printf '–%.0s' $(seq 1 $back_hborder_length)
+  echo ""
 
   for key in "${!group[@]}"; do
     if [ "$key" != "$random_group_key" ]; then
