@@ -1,5 +1,5 @@
 # bashcards
-Flashcards in Bash
+Practice flashcards in bash.
 
 Run `./bashcards` to practice your flashcards.
 
