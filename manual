@@ -1,0 +1,19 @@
+.\" Manpage for bashcards.
+.\" Contact me@robertwpearce.com to correct errors or typos.
+.TH man 8 "06 May 2020" "0.1.0" "bashcards man page"
+.SH NAME
+bashcards \- Practice flashcards in bash
+.SH SYNOPSIS
+bashcards [-d directory]
+.SH DESCRIPTION
+bashcards is a bash program for practicing flashcards in bash.
+.SH OPTIONS
+.TP
+.BR -d
+Directory containing bashcard files (*.bcrds). Each file should contain a group
+of bashcards (one per line) formatted as front=back. If not provided, default
+bashcard values will be used.
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Robert W. Pearce (me@robertwpearce.com)

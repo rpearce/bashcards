@@ -51,3 +51,7 @@ declare -A Swedish=(
 ```
 
 That's it!
+
+## TODO
+* read values from `*.bcrds` files instead of from associative arrays
+* release on nixpkgs
