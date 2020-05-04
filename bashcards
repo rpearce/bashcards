@@ -11,10 +11,20 @@ declare -a groups=(
 )
 
 declare -A Spanish=(
-  ["Goodbye"]="Adiós"
-  ["Hello"]="Hola"
-  ["I love you"]="Te quiero"
-  ["We are very happy"]="Nos alegra muchísimo"
+  ["goodbye"]="adiós"
+  ["hello"]="hola"
+  ["I love you"]="Te quiero."
+  ["We are very happy."]="Nos alegra muchísimo."
+  ["to come"]="venir"
+  ["to stay"]="quedar"
+  ["to arrive"]="llegar"
+  ["to return / go back"]="volver"
+  ["Of course."]="Por supuesto."
+  ["to shower"]="duchar"
+  ["I would like"]="quisiera"
+  ["the spoon"]="la cuchara"
+  ["the forks"]="los tenedores"
+  ["Can you bring two knives?"]="¿Puede traer dos cuchillos?"
 )
 
 declare -A Swedish=(
