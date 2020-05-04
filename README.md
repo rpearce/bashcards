@@ -1,4 +1,7 @@
 # bashcards
+
+[![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
+
 Practice flashcards in bash.
 
 Run `./bashcards` to practice your flashcards.
