@@ -6,7 +6,7 @@ pkgs.stdenv.mkDerivation {
   phases = "unpackPhase installPhase";
   installPhase = ''
     mkdir -p $out/bin $out/share/man/man8
-    cp manual $out/share/man/man8/
+    cp bashcards.8 $out/share/man/man8/
     cp bashcards $out/bin/
   '';
   meta = {
