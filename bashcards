@@ -6,19 +6,30 @@ set -eou pipefail
 
 ext="bcrds"
 
+# to_filename takes `/path/to/file.ext`
+# and echoes `file`
+function to_filename {
+  local full_filename=$(basename $1)
+  local filename="${full_filename%.*}"
+
+  echo "$filename"
+
+  return 0
+}
+
 function run_cards {
   clear
 
-  local group_name=$1
-  eval "declare -A group="${2#*=}
-  local -A updated_group
+  local cards_name=$1
+  eval "declare -A cards="${2#*=}
+  local -A updated_cards
 
-  local group_keys=("${!group[@]}")
-  local group_key_count=${#group_keys[@]}
-  local random_group_key_index="$[$RANDOM % $group_key_count]"
-  local random_group_key="${group_keys[$random_group_key_index]}"
+  local cards_keys=("${!cards[@]}")
+  local cards_keys_count=${#cards_keys[@]}
+  local random_cards_key_index="$[$RANDOM % $cards_keys_count]"
+  local random_cards_key="${cards_keys[$random_cards_key_index]}"
 
-  local selected_key_val=("$random_group_key" "${group[$random_group_key]}")
+  local selected_key_val=("$random_cards_key" "${cards[$random_cards_key]}")
   local random_selected_index="$[$RANDOM % 2]"
 
   local front="${selected_key_val[$random_selected_index]}"
@@ -31,8 +42,8 @@ function run_cards {
   local back_hborder_length=$(( $back_length + 6 ))
   local back_vborder_length=$(( $back_length + 4 ))
 
-  # print group name
-  echo "$group_name"
+  # print cards name
+  echo "$(to_filename $cards_name)"
   echo ""
 
   # print front
@@ -72,13 +83,13 @@ function run_cards {
   printf '–%.0s' $(seq 1 $back_hborder_length)
   echo ""
 
-  for key in "${!group[@]}"; do
-    if [ "$key" != "$random_group_key" ]; then
-      updated_group["$key"]="${group[$key]}"
+  for key in "${!cards[@]}"; do
+    if [ "$key" != "$random_cards_key" ]; then
+      updated_cards["$key"]="${cards[$key]}"
     fi
   done
 
-  if [ ! -v updated_group[@] ]; then
+  if [ ! -v updated_cards[@] ]; then
     echo ""
     echo "All done!"
     read -p "(Press return to exit)" _
@@ -87,7 +98,7 @@ function run_cards {
     read -p "(Press return for next card)" _
   fi
 
-  run_cards $group_name "$(declare -p updated_group)"
+  run_cards $cards_name "$(declare -p updated_cards)"
 }
 
 function select_file {
@@ -97,9 +108,7 @@ function select_file {
   local -a opts
 
   for file in "${files[@]}"; do
-    local filename=$(basename $file)
-    local short="${filename%.*}"
-    opts+=("$short")
+    opts+=("$(to_filename $file)")
   done
 
   clear
