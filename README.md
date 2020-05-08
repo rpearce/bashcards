@@ -4,15 +4,17 @@
 
 Practice flashcards in bash.
 
-Run `./bashcards` to practice your flashcards.
+## Installation
+TODO
 
+## Usage
 ```
-λ ./bashcards
+λ bashcards -d path/to/bcards/directory
 What would you like to practice?
-1. Spanish
-2. Swedish
-3. German
-> 1
+1. german
+2. spanish
+3. swedish
+> 2
 Spanish
 
 –––––––––––––––
@@ -30,31 +32,41 @@ Spanish
 (Press return for next card)
 ```
 
-## Adding a Bashcard Group
-To add some Swedish bashcards, all you need to do is add a `"Swedish"` key to
-the `groups` array:
+## Creating `.bcrds` files
+To add some Spanish and Swedish bashcards, for example, all you need to do is
+create two files, `spanish.bcrds` and `swedish.bcrds`, and add lines to the
+files that take the form `key=value`.
 
 ```bash
-declare -a groups=(
-  "Spanish"
-  "Swedish"
-  "German"
-)
+λ mkdir /path/to/bcards/directory && cd $_
+λ touch spanish.bcrds swedish.bcrds
+λ cat <<EOF > spanish.bcrds
+goodbye=adiós
+hello=hola
+I love you=Te quiero.
+EOF
+λ cat <<EOF > swedish.bcrds
+Goodbye=Adjö
+Hello=Hallå
+I love you=Jag älskar dig
+EOF
 ```
 
-Then you define an associative array of the same name:
+Once your cards are in a folder somewhere, you simply tell `bashcards` where to
+find them!
 
 ```bash
-declare -A Swedish=(
-  ["Goodbye"]="Adjö"
-  ["Hello"]="Hallå"
-  ["I love you"]="Jag älskar dig"
-  ["We are very happy"]="Vi är väldigt lyckliga"
-)
+λ bashcards -d path/to/bcards/directory
+What would you like to practice?
+1. spanish
+2. swedish
+>
 ```
 
-That's it!
+There are example `.bcrds` files in the [examples/](./examples) folder of this
+project.
 
 ## TODO
-* read values from `*.bcrds` files instead of from associative arrays
 * release on nixpkgs
+* release on homebrew
+* blog post
