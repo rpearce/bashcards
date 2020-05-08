@@ -4,48 +4,13 @@ set -o errexit
 set -o nounset
 set -eou pipefail
 
-declare -a groups=(
-  "Spanish"
-  "Swedish"
-  "German"
-)
-
-declare -A Spanish=(
-  ["goodbye"]="adiós"
-  ["hello"]="hola"
-  ["I love you"]="Te quiero."
-  ["We are very happy."]="Nos alegra muchísimo."
-  ["to come"]="venir"
-  ["to stay"]="quedar"
-  ["to arrive"]="llegar"
-  ["to return / go back"]="volver"
-  ["Of course."]="Por supuesto."
-  ["to shower"]="duchar"
-  ["I would like"]="quisiera"
-  ["the spoon"]="la cuchara"
-  ["the forks"]="los tenedores"
-  ["Can you bring two knives?"]="¿Puede traer dos cuchillos?"
-)
-
-declare -A Swedish=(
-  ["Goodbye"]="Adjö"
-  ["Hello"]="Hallå"
-  ["I love you"]="Jag älskar dig"
-  ["We are very happy"]="Vi är väldigt lyckliga"
-)
-
-declare -A German=(
-  ["Goodbye"]="Auf Wiedersehen"
-  ["Hello"]="Hallo"
-  ["I love you"]="Ich liebe dich"
-  ["We are very happy"]="Wir sind sehr glücklich"
-)
+ext="bcrds"
 
 function run_cards {
   clear
 
   local group_name=$1
-  eval "local -A group="${2#*=}
+  eval "declare -A group="${2#*=}
   local -A updated_group
 
   local group_keys=("${!group[@]}")
@@ -125,19 +90,30 @@ function run_cards {
   run_cards $group_name "$(declare -p updated_group)"
 }
 
-function select_group {
+function select_file {
+  local msg="$1"
+  shift
+  local files=("$@")
+  local -a opts
+
+  for file in "${files[@]}"; do
+    local filename=$(basename $file)
+    local short="${filename%.*}"
+    opts+=("$short")
+  done
+
   clear
   echo "What would you like to practice?"
 
-  # list the groups
-  for i in "${!groups[@]}"; do
-    echo "$((i+1)). ${groups[$i]}"
+  # list the files
+  for i in "${!opts[@]}"; do
+    echo "$((i+1)). ${opts[$i]}"
   done
 
   # if there's a feedback message,
   # display that (like an error)
-  if [ "$*" ]; then
-    echo $1
+  if [ -n "$msg" ]; then
+    echo "$msg"
   fi
 
   # get the input
@@ -145,15 +121,55 @@ function select_group {
 
   # make sure the option is in
   # the list and then continue
-  if [ $opt -gt 0 ] && [ $opt -lt $((${#groups[@]} + 1)) ]; then
-    run_cards "${groups[$opt-1]}" "$(declare -p ${groups[$opt-1]})"
+  if [ $opt -gt 0 ] && [ $opt -lt $((${#files[@]} + 1)) ]; then
+    local selected_file="${files[$opt-1]}"
+    local -A cards
+
+    while IFS=\= read key value; do
+      cards["$key"]="$value"
+    done < $selected_file
+
+    run_cards $selected_file "$(declare -p cards)"
   else
-    select_group "(Please select from the options)"
+    select_file "(Please select from the options)" "${files[@]}"
   fi
 }
 
 function start {
-  select_group
+  local -a files
+
+  for file in $1/*.$ext; do
+    files+=("$file")
+  done
+
+  select_file "" "${files[@]}"
+
+  return 0
 }
 
-start
+function usage {
+  cat <<EOF
+Usage: bashcards [OPTION...]
+
+  -d, --dir DIRECTORY    Specify directory with *.$ext files
+  -h, --help             See this help list
+EOF
+  return 0
+}
+
+function unknown-cmd {
+  usage
+  return 1
+}
+
+[[ $# -lt 1 ]] && unknown-cmd
+
+if [ $# -lt 1 ]; then
+  start $PWD
+else
+  case "$1" in
+    -d|--dir ) start $2    ;;
+    -h|--help) usage       ;;
+            *) unknown-cmd ;;
+  esac
+fi
