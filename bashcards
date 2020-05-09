@@ -7,13 +7,20 @@ set -eou pipefail
 
 pname="bashcards"
 ext="bcrds"
+version="0.1.2"
+
+function version {
+  echo "$version"
+  return 0
+}
 
 function usage {
   cat <<EOF
 Usage: $pname [OPTION...]
 
-  -d, --dir DIRECTORY    Specify directory with *.$ext files
+  -d, --dir DIRECTORY    Directory containing *.$ext files
   -h, --help             See this help information
+  -v, --version          Current version
 EOF
 
   return 0
@@ -208,7 +215,8 @@ function start {
 # Determine command
 
 case "$1" in
-  -d|--dir ) [[ ! -n "${2-}" ]] && dir_not_found; start $2;;
-  -h|--help) usage;;
-          *) unknown-cmd;;
+  -d|--dir    ) [[ ! -n "${2-}" ]] && dir_not_found; start $2;;
+  -h|--help   ) usage;;
+  -v|--version) version;;
+             *) unknown-cmd;;
 esac
