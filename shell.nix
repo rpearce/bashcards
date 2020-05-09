@@ -5,7 +5,7 @@ bashcards = pkgs.callPackage ./derivation.nix { };
 in
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    man
     bashcards
+    man
   ];
 }

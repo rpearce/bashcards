@@ -3,7 +3,7 @@
 pkgs.stdenv.mkDerivation {
   name = "bashcards";
   src = ./.;
-  phases = "unpackPhase installPhase";
+  dontBuild = true;
   installPhase = ''
     mkdir -p $out/bin $out/share/man/man8
     cp bashcards.8 $out/share/man/man8/
