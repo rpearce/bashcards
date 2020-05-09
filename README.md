@@ -5,9 +5,29 @@
 Practice flashcards in bash.
 
 ## Installation
-There are a few different options for using this project:
-* nix: TODO
-* homebrew: TODO
+There are a couple of different ways to use this project.
+
+### Nix
+To install via [nixpkgs](https://github.com/nixos/nixpkgs):
+
+```bash
+λ nix-env -i bashcards
+```
+
+### Clone the Repository
+```bash
+λ git clone https://github.com/rpearce/bashcards.git
+λ cd bashcards
+λ ./bashcards -d path/to/bcards/directory
+```
+
+You can also use it in `nix-shell`:
+
+```bash
+λ nix-shell --pure
+[nix-shell:~/projects/bashcards]$ man bashcards
+[nix-shell:~/projects/bashcards]$ bashcards -d path/to/bcards/directory
+```
 
 ## Usage
 ```
