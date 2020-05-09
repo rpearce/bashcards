@@ -4,15 +4,71 @@ set -o errexit
 set -o nounset
 set -eou pipefail
 
+pname="bashcards"
 ext="bcrds"
 
-# to_filename takes `/path/to/file.ext`
-# and echoes `file`
+function usage {
+  cat <<EOF
+Usage: $pname [OPTION...]
+
+  -d, --dir DIRECTORY    Specify directory with *.$ext files
+  -h, --help             See this help information
+EOF
+
+  return 0
+}
+
+function unknown-cmd {
+  echo "$pname: Sorry! I'm not sure what to do. Please use a known option."
+  echo ""
+  usage
+  return 1
+}
+
+function dir_not_found {
+  echo "$pname: Directory not found. Are you sure you typed it correctly?"
+  exit 1
+}
+
+# to_filename transforms `/path/to/file.ext` to `file`
 function to_filename {
   local full_filename=$(basename $1)
   local filename="${full_filename%.*}"
 
   echo "$filename"
+
+  return 0
+}
+
+# builds the card output; for example:
+# ––––––––––––––––
+# |              |
+# |  Te quiero.  |
+# |              |
+# ––––––––––––––––
+function make_card {
+  local hborder_length="$1"
+  local vborder_length="$2"
+  shift
+  shift
+  local content="$@"
+
+  echo ""
+  printf '–%.0s' $(seq 1 $hborder_length)
+  echo ""
+  printf "|"
+  printf ' %.0s' $(seq 1 $vborder_length)
+  printf "|"
+  echo ""
+
+  echo "|  $content  |"
+
+  printf "|"
+  printf ' %.0s' $(seq 1 $vborder_length)
+  printf "|"
+  echo ""
+  printf '–%.0s' $(seq 1 $hborder_length)
+  echo ""
 
   return 0
 }
@@ -44,44 +100,14 @@ function run_cards {
 
   # print cards name
   echo "$(to_filename $cards_name)"
-  echo ""
 
   # print front
-  printf '–%.0s' $(seq 1 $front_hborder_length)
-  echo ""
-  printf "|"
-  printf ' %.0s' $(seq 1 $front_vborder_length)
-  printf "|"
-  echo ""
-
-  echo "|  $front  |"
-
-  printf "|"
-  printf ' %.0s' $(seq 1 $front_vborder_length)
-  printf "|"
-  echo ""
-  printf '–%.0s' $(seq 1 $front_hborder_length)
-  echo ""
+  echo "$(make_card $front_hborder_length $front_vborder_length $front)"
 
   read -p "(Press return to flip)" _
 
   # print back
-  echo ""
-  printf '–%.0s' $(seq 1 $back_hborder_length)
-  echo ""
-  printf "|"
-  printf ' %.0s' $(seq 1 $back_vborder_length)
-  printf "|"
-  echo ""
-
-  echo "|  $back  |"
-
-  printf "|"
-  printf ' %.0s' $(seq 1 $back_vborder_length)
-  printf "|"
-  echo ""
-  printf '–%.0s' $(seq 1 $back_hborder_length)
-  echo ""
+  echo "$(make_card $back_hborder_length $back_vborder_length $back)"
 
   for key in "${!cards[@]}"; do
     if [ "$key" != "$random_cards_key" ]; then
@@ -99,6 +125,8 @@ function run_cards {
   fi
 
   run_cards $cards_name "$(declare -p updated_cards)"
+
+  return 0
 }
 
 function select_file {
@@ -130,7 +158,11 @@ function select_file {
 
   # make sure the option is in
   # the list and then continue
-  if [ $opt -gt 0 ] && [ $opt -lt $((${#files[@]} + 1)) ]; then
+  if
+    [[ "$opt" =~ ^[0-9]+$ ]] &&
+    [ $opt -gt 0 ] &&
+    [ $opt -lt $((${#files[@]} + 1)) ]
+  then
     local selected_file="${files[$opt-1]}"
     local -A cards
 
@@ -142,43 +174,34 @@ function select_file {
   else
     select_file "(Please select from the options)" "${files[@]}"
   fi
+
+  return 0
 }
 
 function start {
   local -a files
 
-  for file in $1/*.$ext; do
-    files+=("$file")
-  done
+  if [ -d $1 ]; then
+    for file in $1/*.$ext; do
+      files+=("$file")
+    done
 
-  select_file "" "${files[@]}"
+    select_file "" "${files[@]}"
 
-  return 0
+    return 0
+  else
+    dir_not_found
+  fi
 }
 
-function usage {
-  cat <<EOF
-Usage: bashcards [OPTION...]
-
-  -d, --dir DIRECTORY    Specify directory with *.$ext files
-  -h, --help             See this help list
-EOF
-  return 0
-}
-
-function unknown-cmd {
-  usage
-  return 1
-}
+# Check if no command is provided
 
 [[ $# -lt 1 ]] && unknown-cmd
 
-if [ $# -lt 1 ]; then
-  start $PWD
-else
-  case "$1" in
-    -d|--dir ) start $2    ;;
-    -h|--help) usage       ;;
-            *) unknown-cmd ;;
-  esac
-fi
+# Determine command
+
+case "$1" in
+  -d|--dir ) [[ ! -n "${2-}" ]] && dir_not_found; start $2;;
+  -h|--help) usage;;
+          *) unknown-cmd;;
+esac
