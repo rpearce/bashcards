@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -o errexit
+set -o errtrace
 set -o nounset
 set -eou pipefail
 
@@ -32,7 +33,7 @@ function dir_not_found {
 
 # to_filename transforms `/path/to/file.ext` to `file`
 function to_filename {
-  local full_filename=$(basename $1)
+  local full_filename=$(basename "$1")
   local filename="${full_filename%.*}"
 
   echo "$filename"
