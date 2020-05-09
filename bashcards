@@ -28,7 +28,7 @@ function unknown-cmd {
 
 function dir_not_found {
   echo "$pname: Directory not found. Are you sure you typed it correctly?"
-  exit 1
+  return 1
 }
 
 # to_filename transforms `/path/to/file.ext` to `file`
