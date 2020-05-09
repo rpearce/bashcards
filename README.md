@@ -5,7 +5,9 @@
 Practice flashcards in bash.
 
 ## Installation
-TODO
+There are a few different options for using this project:
+* nix: TODO
+* homebrew: TODO
 
 ## Usage
 ```
@@ -65,8 +67,3 @@ What would you like to practice?
 
 There are example `.bcrds` files in the [examples/](./examples) folder of this
 project.
-
-## TODO
-* release on nixpkgs
-* release on homebrew
-* blog post
