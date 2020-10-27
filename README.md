@@ -4,6 +4,32 @@
 
 Practice flashcards in bash.
 
+## Usage
+
+```bash
+λ bashcards -d path/to/bcards/directory
+What would you like to practice?
+1. german
+2. spanish
+3. swedish
+> 2
+Spanish
+
+–––––––––––––––
+|             |
+|  Te quiero  |
+|             |
+–––––––––––––––
+(Press return to flip)
+
+––––––––––––––––
+|              |
+|  I love you  |
+|              |
+––––––––––––––––
+(Press return for next card)
+```
+
 ## Installation
 
 There are a couple of different ways to use this project.
@@ -36,32 +62,6 @@ You can also use it in `nix-shell`:
 λ nix-shell --pure
 [nix-shell:~/projects/bashcards]$ man bashcards
 [nix-shell:~/projects/bashcards]$ bashcards -d path/to/bcards/directory
-```
-
-## Usage
-
-```bash
-λ bashcards -d path/to/bcards/directory
-What would you like to practice?
-1. german
-2. spanish
-3. swedish
-> 2
-Spanish
-
-–––––––––––––––
-|             |
-|  Te quiero  |
-|             |
-–––––––––––––––
-(Press return to flip)
-
-––––––––––––––––
-|              |
-|  I love you  |
-|              |
-––––––––––––––––
-(Press return for next card)
 ```
 
 ## Creating `.bcrds` files
