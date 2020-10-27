@@ -64,6 +64,11 @@ You can also use it in `nix-shell`:
 [nix-shell:~/projects/bashcards]$ bashcards -d path/to/bcards/directory
 ```
 
+### Download a Release
+
+[Specific releases](https://github.com/rpearce/bashcards/releases) can be
+downloaded and used just like the `Clone the Repository` section above.
+
 ## Creating `.bcrds` files
 
 To add some Spanish and Swedish bashcards, for example, all you need to do is
