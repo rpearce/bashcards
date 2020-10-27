@@ -1,8 +1,21 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -o errexit
 set -o errtrace
 set -o nounset
 set -eou pipefail
 
+TARGET_PATH="/usr/local/bin/bashcards"
+EXECUTABLE_URL="https://raw.githubusercontent.com/rpearce/bashcards/master/bashcards"
 
+install_bashcards() {
+  curl \
+    -o "$TARGET_PATH" \
+    -fsSL "$EXECUTABLE_URL"
+
+  chmod +x "$TARGET_PATH"
+
+  echo "Installed $TARGET_PATH from $EXECUTABLE_URL"
+}
+
+install_bashcards

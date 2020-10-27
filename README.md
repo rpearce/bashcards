@@ -5,16 +5,25 @@
 Practice flashcards in bash.
 
 ## Installation
+
 There are a couple of different ways to use this project.
 
 ### Nix
+
 To install via [nixpkgs](https://github.com/nixos/nixpkgs):
 
 ```bash
 λ nix-env -i bashcards
 ```
 
+### Install Script
+
+```bash
+λ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/rpearce/bashcards/master/install)"
+```
+
 ### Clone the Repository
+
 ```bash
 λ git clone https://github.com/rpearce/bashcards.git
 λ cd bashcards
@@ -30,7 +39,8 @@ You can also use it in `nix-shell`:
 ```
 
 ## Usage
-```
+
+```bash
 λ bashcards -d path/to/bcards/directory
 What would you like to practice?
 1. german
@@ -55,6 +65,7 @@ Spanish
 ```
 
 ## Creating `.bcrds` files
+
 To add some Spanish and Swedish bashcards, for example, all you need to do is
 create two files, `spanish.bcrds` and `swedish.bcrds`, and add lines to the
 files that take the form `key=value`.
