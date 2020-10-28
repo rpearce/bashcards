@@ -4,6 +4,8 @@
 
 Practice flashcards in bash.
 
+_Note: requires bash v4_
+
 ## Usage
 
 ```bash
