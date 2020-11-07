@@ -47,7 +47,7 @@ To install via [nixpkgs](https://github.com/nixos/nixpkgs):
 ### Install Script
 
 ```bash
-λ /usr/bin/env bash -c "$(curl -fsSL https://raw.githubusercontent.com/rpearce/bashcards/master/install)"
+λ /usr/bin/env bash -c "$(curl -fsSL https://raw.githubusercontent.com/rpearce/bashcards/main/install)"
 ```
 
 ### Clone the Repository

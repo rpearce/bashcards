@@ -6,7 +6,7 @@ set -o nounset
 set -eou pipefail
 
 TARGET_PATH="/usr/local/bin/bashcards"
-EXECUTABLE_URL="https://raw.githubusercontent.com/rpearce/bashcards/master/bashcards"
+EXECUTABLE_URL="https://raw.githubusercontent.com/rpearce/bashcards/main/bashcards"
 
 install_bashcards() {
   curl \
