@@ -1,0 +1,8 @@
+axiom=A fundamental assumption regarding the object of study that is accepted without proof
+conjecture=An unproved statement that is believed to be true
+corollary=A theorem of less importance which can be readily deduced from a previous, more notable statement
+lemma=A generally minor, proven proposition which is used as a stepping stone to a larger result
+predicate=A statement that is either true or false depending on the values of the variables within it
+proof=An inferential argument for a mathematical statement, showing that the stated assumptions logically guarantee the conclusion
+proposition=A theorem of lesser importance, or one that is considered so elementary or immediately obvious, that it may be stated without proof
+theorem=A statement that has been proven to be true based on axioms or other theorems
