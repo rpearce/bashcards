@@ -1,7 +1,5 @@
 # bashcards
 
-[![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
-
 Practice flashcards in your terminal
 
 _Note: requires bash v4_
