@@ -16,11 +16,6 @@ setup() {
   DECKS="$BATS_TEST_TMPDIR/decks"
   mkdir -p "$DECKS"
 
-  # the input for practicing a whole deck: choose the first
-  # deck, then press return until the program exits
-  PRACTICE_INPUT="$BATS_TEST_TMPDIR/practice-input"
-  { printf '1\n'; printf '\n%.0s' {1..100}; } > "$PRACTICE_INPUT"
-
   # a UTF-8 locale, so card borders are measured in characters
   export LC_ALL=C.UTF-8
 }
@@ -40,8 +35,16 @@ function deck {
   printf '%s\n' "$@" > "$DECKS/$name.bcrds"
 }
 
+# writes the input for practicing a whole deck: choose the
+# first deck, then press return until the program exits
+function practice_input {
+  PRACTICE_INPUT="$BATS_TEST_TMPDIR/practice-input"
+  { printf '1\n'; printf '\n%.0s' {1..100}; } > "$PRACTICE_INPUT"
+}
+
 # practices the first deck in a directory (default: $DECKS)
 function practice {
+  practice_input
   run bashcards -d "${1:-$DECKS}" < "$PRACTICE_INPUT"
 }
 
@@ -188,6 +191,7 @@ function has_line {
 
 @test "warns about a line without = and skips it" {
   deck spanish "hola=hello" "oops" "adios=goodbye"
+  practice_input
   run --separate-stderr bashcards -d "$DECKS" < "$PRACTICE_INPUT"
   [ "$status" -eq 0 ]
   [[ "$stderr" == *"line 2"* ]]
