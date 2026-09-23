@@ -160,3 +160,11 @@ bash 3.2:
 
 Plain `nix-build` and `nix-shell` still work; they read `flake.nix` through
 [flake-compat](https://github.com/edolstra/flake-compat).
+
+### Releasing
+
+1. bump the version in `bashcards`, `install` and the `.TH` line of
+   `bashcards.1`, and add a `CHANGELOG.md` entry
+2. tag it: `git tag vX.Y.Z` (the install script downloads by tag, so the tag
+   has to exist before the install one-liner works)
+3. bump the [nixpkgs package](https://github.com/NixOS/nixpkgs/tree/master/pkgs/by-name/ba/bashcards)

@@ -4,8 +4,9 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-# which release to install, where to put it,
-# and where to download it from
+# which release to install, where to put it, and where to
+# download it from (point RAW_URL at a mirror or a fork to
+# install from somewhere else)
 VERSION="${BASHCARDS_VERSION:-0.2.0}"
 PREFIX="${PREFIX:-/usr/local}"
 RAW_URL="${BASHCARDS_RAW_URL:-https://raw.githubusercontent.com/rpearce/bashcards}"

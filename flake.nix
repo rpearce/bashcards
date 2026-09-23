@@ -43,6 +43,14 @@
         pkgs:
         let
           inherit (self.packages.${pkgs.stdenv.hostPlatform.system}) bashcards;
+
+          # A check passes when its script does.
+          check =
+            name: attrs: script:
+            pkgs.runCommand "bashcards-${name}" attrs ''
+              ${script}
+              touch "$out"
+            '';
         in
         {
           build = bashcards;
@@ -51,23 +59,21 @@
           # patched shebang and the installed program actually run).
           version = bashcards.tests.version;
 
-          shellcheck = pkgs.runCommand "bashcards-shellcheck" { nativeBuildInputs = [ pkgs.shellcheck ]; } ''
+          shellcheck = check "shellcheck" { nativeBuildInputs = [ pkgs.shellcheck ]; } ''
             cd ${self}
             shellcheck --shell=bash bashcards install
-            touch "$out"
           '';
 
           # Fails on warnings and errors; loosen to `-W error` or tighten to
           # `-W style` as desired.
-          mandoc = pkgs.runCommand "bashcards-mandoc-lint" { nativeBuildInputs = [ pkgs.mandoc ]; } ''
+          mandoc = check "mandoc-lint" { nativeBuildInputs = [ pkgs.mandoc ]; } ''
             mandoc -T lint -W warning ${self}/bashcards.1
-            touch "$out"
           '';
 
           # The bats suite runs against the *installed* program, so the packaged
           # artifact is what gets tested (see test/*.bats for the fallback).
           bats =
-            pkgs.runCommand "bashcards-bats"
+            check "bats"
               {
                 nativeBuildInputs = [
                   pkgs.bats
@@ -77,13 +83,11 @@
               }
               ''
                 bats --print-output-on-failure ${self}/test
-                touch "$out"
               '';
 
-          nixfmt = pkgs.runCommand "bashcards-nixfmt" { nativeBuildInputs = [ pkgs.nixfmt ]; } ''
+          nixfmt = check "nixfmt" { nativeBuildInputs = [ pkgs.nixfmt ]; } ''
             cd ${self}
             nixfmt --check flake.nix default.nix shell.nix nix/*.nix
-            touch "$out"
           '';
         }
       );

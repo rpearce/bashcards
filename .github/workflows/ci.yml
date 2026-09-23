@@ -33,6 +33,7 @@ jobs:
       # the nixfmt check (see `checks` in flake.nix).
       - run: nix flake check --print-build-logs
 
-      # Smoke test the same entry point users get from
-      # `nix run github:rpearce/bashcards`.
+      # The version check above already runs the program; this additionally
+      # proves `nix run` resolves the package (via meta.mainProgram), which is
+      # the entry point users get from `nix run github:rpearce/bashcards`.
       - run: nix run --print-build-logs . -- --version
