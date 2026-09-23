@@ -1,0 +1,77 @@
+.\" Manpage for bashcards.
+.\" Contact me@robertwpearce.com to correct errors or typos.
+.TH BASHCARDS 1 "2026-09-22" "bashcards 0.2.0" "User Commands"
+.SH NAME
+bashcards \- practice flashcards in bash
+.SH SYNOPSIS
+.B bashcards
+.BR \-d | \-\-dir
+.I DIRECTORY
+.br
+.B bashcards
+.BR \-h | \-\-help
+.br
+.B bashcards
+.BR \-v | \-\-version
+.SH DESCRIPTION
+.B bashcards
+is a bash program for practicing flashcards in bash.
+It lists the decks (*.bcrds files) in a directory and lets you pick one.
+It then shows each card in a random order: one side, then the other when
+you press return.
+Which side comes first is random, too.
+.SH OPTIONS
+.TP
+.BI "\-d, \-\-dir " DIRECTORY
+Directory containing bashcard files (*.bcrds).
+.TP
+.B \-h, \-\-help
+See this help information
+.TP
+.B \-v, \-\-version
+Current version
+.SH DECK FILES
+A deck is a UTF-8 text file named
+.IR something .bcrds
+with one card per line, formatted as
+.IR front = back .
+Everything after the first
+.B =
+is the back of the card, so a back may contain
+.B =
+but a front may not.
+Blank lines are ignored.
+Lines without an
+.B =
+are skipped with a warning.
+.PP
+For example, spanish.bcrds:
+.PP
+.RS
+.nf
+Te quiero.=I love you.
+Hasta luego.=See you later.
+.fi
+.RE
+.SH ENVIRONMENT
+Card borders are measured in characters, so
+.B bashcards
+expects a UTF-8 locale
+.RB ( LC_ALL ,
+.B LC_CTYPE
+or
+.BR LANG )
+and warns when it finds anything else.
+.SH EXIT STATUS
+.B bashcards
+exits 0 when you finish a deck or leave with ctrl-d.
+It exits 1 when given an unknown option, no directory, a directory that
+does not exist, or a directory without any *.bcrds files.
+.SH EXAMPLES
+.nf
+bashcards \-d ~/flashcards
+.fi
+.SH BUGS
+Report bugs at https://github.com/rpearce/bashcards/issues
+.SH AUTHOR
+Robert W. Pearce (me@robertwpearce.com)

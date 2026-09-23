@@ -1,21 +1,31 @@
 #!/usr/bin/env bash
 
 set -o errexit
-set -o errtrace
 set -o nounset
-set -eou pipefail
+set -o pipefail
 
-TARGET_PATH="/usr/local/bin/bashcards"
-EXECUTABLE_URL="https://raw.githubusercontent.com/rpearce/bashcards/main/bashcards"
+# which release to install, where to put it,
+# and where to download it from
+VERSION="${BASHCARDS_VERSION:-0.2.0}"
+PREFIX="${PREFIX:-/usr/local}"
+RAW_URL="${BASHCARDS_RAW_URL:-https://raw.githubusercontent.com/rpearce/bashcards}"
+
+RELEASE_URL="$RAW_URL/v$VERSION"
+TMP_DIR="$(mktemp -d)"
+
+trap 'rm -rf "$TMP_DIR"' EXIT
 
 install_bashcards() {
-  curl \
-    -o "$TARGET_PATH" \
-    -fsSL "$EXECUTABLE_URL"
+  # download everything first, so a failed download
+  # can't leave a half-written bashcards behind
+  curl -fsSL "$RELEASE_URL/bashcards" -o "$TMP_DIR/bashcards"
+  curl -fsSL "$RELEASE_URL/bashcards.1" -o "$TMP_DIR/bashcards.1"
 
-  chmod +x "$TARGET_PATH"
+  install -d "$PREFIX/bin" "$PREFIX/share/man/man1"
+  install -m 0755 "$TMP_DIR/bashcards" "$PREFIX/bin/bashcards"
+  install -m 0644 "$TMP_DIR/bashcards.1" "$PREFIX/share/man/man1/bashcards.1"
 
-  echo "Installed $TARGET_PATH from $EXECUTABLE_URL"
+  echo "Installed $PREFIX/bin/bashcards and its man page from $RELEASE_URL"
 }
 
 install_bashcards
