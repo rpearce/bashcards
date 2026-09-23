@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Cancel in-progress runs for the same branch or pull request.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: nix flake check (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Builds the package and runs shellcheck, mandoc lint, the bats suite and
+      # the nixfmt check (see `checks` in flake.nix).
+      - run: nix flake check --print-build-logs
+
+      # Smoke test the same entry point users get from
+      # `nix run github:rpearce/bashcards`.
+      - run: nix run --print-build-logs . -- --version
