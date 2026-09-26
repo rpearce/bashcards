@@ -3,7 +3,7 @@
 {
   lib,
   stdenv,
-  bash,
+  bashNonInteractive,
   installShellFiles,
   testers,
 }:
@@ -28,7 +28,9 @@ stdenv.mkDerivation (finalAttrs: {
   };
 
   # fixupPhase's patchShebangs rewrites `#!/usr/bin/env bash` to this bash.
-  buildInputs = [ bash ];
+  # `bash` is the interactive build (readline, ncurses, ...), which the script
+  # doesn't need and which makes the closure about 20 times bigger.
+  buildInputs = [ bashNonInteractive ];
   nativeBuildInputs = [ installShellFiles ];
 
   dontBuild = true;
