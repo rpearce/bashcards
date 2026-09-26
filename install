@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 
-set -o errexit
-set -o nounset
-set -o pipefail
+set -eou pipefail
 
-# which release to install, where to put it, and where to
-# download it from (point RAW_URL at a mirror or a fork to
-# install from somewhere else)
+# which release to install and where to download it from
+# (point RAW_URL at a mirror or a fork to install from
+# somewhere else)
 VERSION="${BASHCARDS_VERSION:-0.2.0}"
-PREFIX="${PREFIX:-/usr/local}"
 RAW_URL="${BASHCARDS_RAW_URL:-https://raw.githubusercontent.com/rpearce/bashcards}"
+
+# where to put it: your home directory, so there's no need
+# for sudo, unless you're root (like under sudo), in which
+# case it goes where everyone can use it
+if [ "$EUID" -eq 0 ]; then
+  PREFIX="${PREFIX:-/usr/local}"
+else
+  PREFIX="${PREFIX:-$HOME/.local}"
+fi
 
 RELEASE_URL="$RAW_URL/v$VERSION"
 TMP_DIR="$(mktemp -d)"
@@ -27,6 +33,19 @@ install_bashcards() {
   install -m 0644 "$TMP_DIR/bashcards.1" "$PREFIX/share/man/man1/bashcards.1"
 
   echo "Installed $PREFIX/bin/bashcards and its man page from $RELEASE_URL"
+
+  # ~/.local/bin isn't on everyone's PATH (like on macOS);
+  # once it is, man finds the man page next to it, too
+  case ":$PATH:" in
+    *":$PREFIX/bin:"*) ;;
+    *)
+      echo ""
+      echo "$PREFIX/bin isn't on your PATH, so add this line to your shell's"
+      echo "startup file (like ~/.bashrc or ~/.zshrc) and open a new terminal:"
+      echo ""
+      echo "  export PATH=\"$PREFIX/bin:\$PATH\""
+      ;;
+  esac
 }
 
 install_bashcards

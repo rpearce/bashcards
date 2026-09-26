@@ -1,6 +1,6 @@
 .\" Manpage for bashcards.
 .\" Contact me@robertwpearce.com to correct errors or typos.
-.TH BASHCARDS 1 "2026-09-22" "bashcards 0.2.0" "User Commands"
+.TH BASHCARDS 1 "2026-09-25" "bashcards 0.2.0" "User Commands"
 .SH NAME
 bashcards \- practice flashcards in bash
 .SH SYNOPSIS
@@ -42,7 +42,9 @@ is the back of the card, so a back may contain
 but a front may not.
 Blank lines are ignored.
 Lines without an
-.B =
+.BR = ,
+or with no text before or after the first
+.BR = ,
 are skipped with a warning.
 .PP
 For example, spanish.bcrds:

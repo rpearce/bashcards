@@ -198,6 +198,19 @@ function has_line {
   [ "$(card_lines)" -eq 4 ]
 }
 
+@test "warns about a line with a blank side and skips it" {
+  deck spanish "hola=hello" "=hello" "hola=" "=" " =hello" "hola= " "adios=goodbye"
+  practice_input
+  run --separate-stderr bashcards -d "$DECKS" < "$PRACTICE_INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$stderr" == *"line 2"* ]]
+  [[ "$stderr" == *"line 3"* ]]
+  [[ "$stderr" == *"line 4"* ]]
+  [[ "$stderr" == *"line 5"* ]]
+  [[ "$stderr" == *"line 6"* ]]
+  [ "$(card_lines)" -eq 4 ]
+}
+
 @test "returns to the menu when a deck has no cards" {
   : > "$DECKS/empty.bcrds"
   run bashcards -d "$DECKS" <<< "1"
