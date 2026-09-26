@@ -13,6 +13,9 @@ version="0.2.0"
 # the deck being practiced: one `front=back` line per card
 cards=()
 
+# set by warn so we can pause before the screen is cleared
+warned=0
+
 function print_version {
   echo "$version"
   return 0
@@ -33,6 +36,7 @@ USAGE
 # prints a message to stderr, prefixed with the program name
 function warn {
   printf '%s: %s\n' "$pname" "$*" >&2
+  warned=1
   return 0
 }
 
@@ -113,6 +117,18 @@ function clearscreen {
   return 0
 }
 
+# gives the user a chance to read any warnings before the
+# screen is cleared (only needed when both are on the terminal)
+function pause_for_warnings {
+  if [ "$warned" -eq 1 ] && [ -t 1 ] && [ -t 2 ]; then
+    read -rp "(Press return to continue)" _ || goodbye
+  fi
+
+  warned=0
+
+  return 0
+}
+
 # reads a deck's `front=back` lines into cards, skipping blank
 # lines and warning about lines it doesn't understand
 function read_cards {
@@ -133,7 +149,12 @@ function read_cards {
       continue
     fi
 
-    if [[ "$line" != *=* ]]; then
+    # a card needs an = with some text on both sides of it
+    if
+      [[ "$line" != *=* ]] ||
+      [[ "${line%%=*}" != *[![:space:]]* ]] ||
+      [[ "${line#*=}" != *[![:space:]]* ]]
+    then
       warn "Skipping line $line_number of $file because it isn't front=back"
       continue
     fi
@@ -250,6 +271,7 @@ function select_file {
     fi
 
     read_cards "${files[$selected]}"
+    pause_for_warnings
 
     if [ "${#cards[@]}" -eq 0 ]; then
       msg="(${opts[$selected]} has no cards)"
@@ -275,6 +297,7 @@ function start {
   fi
 
   check_locale
+  pause_for_warnings
 
   shopt -s nullglob
   files=("$dir"/*."$ext")

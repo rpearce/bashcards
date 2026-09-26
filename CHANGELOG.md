@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * control characters in a `.bcrds` file could drive the terminal
 * `-d` without a directory said the directory wasn't found
 * warns when the locale isn't UTF-8, since card borders won't line up
+* a `.bcrds` line with a blank front or back is skipped with a warning
+  instead of showing an empty card
+* warnings wait for return before the screen is cleared, so they can be read
 * typos and duplicate cards in the example decks
 
 ### Added
