@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * `install` downloads a pinned release instead of `main`, installs the man
   page, honors `PREFIX`, and no longer truncates an existing `bashcards` when
   a download fails
+* `install` installs into `~/.local` by default, so it no longer needs `sudo`,
+  and says how to add `~/.local/bin` to your `PATH` when it isn't there
+  (running it as root still installs into `/usr/local`)
 * nix: replaced niv with a flake (`nix run github:rpearce/bashcards`) and
   added `nix flake check` and GitHub Actions CI
 

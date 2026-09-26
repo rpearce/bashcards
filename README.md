@@ -57,17 +57,22 @@ which may lag behind this repository:
 
 ### Install Script
 
-The install script downloads a release and puts `bashcards` and its man page
-under `/usr/local`, which usually needs `sudo`:
+The install script downloads a release and puts `bashcards` in `~/.local/bin`
+and its man page in `~/.local/share/man`, so it doesn't need `sudo`:
 
 ```
-λ sudo /usr/bin/env bash -c "$(curl -fsSL https://raw.githubusercontent.com/rpearce/bashcards/main/install)"
+λ curl -fsSL https://raw.githubusercontent.com/rpearce/bashcards/main/install | bash
 ```
 
-To install somewhere else, set `PREFIX`:
+If `~/.local/bin` isn't on your `PATH` yet (it usually isn't on macOS), the
+script tells you how to add it.
+
+To install it for everyone under `/usr/local` instead, run it with `sudo`, or
+set `PREFIX` to pick any other directory:
 
 ```
-λ PREFIX=~/.local /usr/bin/env bash -c "$(curl -fsSL https://raw.githubusercontent.com/rpearce/bashcards/main/install)"
+λ curl -fsSL https://raw.githubusercontent.com/rpearce/bashcards/main/install | sudo bash
+λ curl -fsSL https://raw.githubusercontent.com/rpearce/bashcards/main/install | PREFIX=~/tools bash
 ```
 
 ### Clone the Repository
@@ -79,11 +84,12 @@ To install somewhere else, set `PREFIX`:
 ```
 
 You can also install it (and its man page) with `make`, which honors `PREFIX`
-and `DESTDIR`:
+and `DESTDIR`. `PREFIX=~/.local` installs it just for you, like the install
+script does, and `sudo make install` installs it under `/usr/local`:
 
 ```
-λ sudo make install
 λ make install PREFIX=~/.local
+λ sudo make install
 ```
 
 ### Download a Release
