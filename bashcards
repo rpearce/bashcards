@@ -1,52 +1,78 @@
 #!/usr/bin/env bash
 
 set -o errexit
-set -o errtrace
 set -o nounset
-set -eou pipefail
+set -o pipefail
 
 pname="bashcards"
 ext="bcrds"
-version="0.1.3"
 
-function version {
+# nix/package.nix reads the version from this line
+version="0.2.0"
+
+# the deck being practiced: one `front=back` line per card
+cards=()
+
+function print_version {
   echo "$version"
   return 0
 }
 
 function usage {
-  cat <<EOF
+  cat <<USAGE
 Usage: $pname [OPTION...]
 
   -d, --dir DIRECTORY    Directory containing *.$ext files
   -h, --help             See this help information
   -v, --version          Current version
-EOF
+USAGE
 
   return 0
 }
 
-function unknown-cmd {
-  echo "$pname: Sorry! I'm not sure what to do. Please use a known option."
-  echo ""
-  usage
-  return 1
+# prints a message to stderr, prefixed with the program name
+function warn {
+  printf '%s: %s\n' "$pname" "$*" >&2
+  return 0
 }
 
-function dir_not_found {
-  echo "$pname: Directory not found. Are you sure you typed it correctly?"
-  return 1
+# prints a message to stderr and gives up
+function die {
+  warn "$@"
+  exit 1
+}
+
+function unknown-cmd {
+  warn "Sorry! I'm not sure what to do. Please use a known option."
+  echo "" >&2
+  usage >&2
+  exit 1
+}
+
+# leaves the program when there's no more input (like ctrl-d)
+function goodbye {
+  echo ""
+  exit 0
+}
+
+# card borders are measured in characters, which only
+# works when the locale is UTF-8, so say so when it isn't
+function check_locale {
+  local locale="${LC_ALL:-${LC_CTYPE:-${LANG:-}}}"
+
+  if [[ "$locale" != *[Uu][Tt][Ff]* ]]; then
+    warn "Your locale (${locale:-unset}) isn't UTF-8, so card borders may not line up."
+  fi
+
+  return 0
 }
 
 # to_filename transforms `/path/to/file.ext` to `file`
 function to_filename {
-  local full_filename
-  local filename
+  local full_filename="${1##*/}"
+  local filename="${full_filename%.*}"
 
-  full_filename=$(basename "$1")
-  filename="${full_filename%.*}"
-
-  echo "$filename"
+  printf '%s\n' "$filename"
 
   return 0
 }
@@ -58,163 +84,209 @@ function to_filename {
 # |              |
 # ––––––––––––––––
 function make_card {
-  local hborder_length="$1"
-  local vborder_length="$2"
-  shift
-  shift
-  local content="$*"
+  local content="$1"
+  local hborder
+  local vborder
+
+  printf -v hborder '%*s' $(( ${#content} + 6 )) ''
+  printf -v vborder '%*s' $(( ${#content} + 4 )) ''
+  hborder="${hborder// /–}"
+  vborder="|$vborder|"
 
   echo ""
-  printf '–%.0s' $(seq 1 "$hborder_length")
-  echo ""
-  printf "|"
-  printf ' %.0s' $(seq 1 "$vborder_length")
-  printf "|"
-  echo ""
-
-  echo "|  $content  |"
-
-  printf "|"
-  printf ' %.0s' $(seq 1 "$vborder_length")
-  printf "|"
-  echo ""
-  printf '–%.0s' $(seq 1 "$hborder_length")
-  echo ""
+  printf '%s\n' "$hborder"
+  printf '%s\n' "$vborder"
+  printf '%s\n' "|  $content  |"
+  printf '%s\n' "$vborder"
+  printf '%s\n' "$hborder"
 
   return 0
 }
 
+# clears the screen, but only when
+# we're printing to a terminal
 function clearscreen {
-  printf '\033c'
+  if [ -t 1 ]; then
+    printf '\033[H\033[2J'
+  fi
+
   return 0
 }
 
+# reads a deck's `front=back` lines into cards, skipping blank
+# lines and warning about lines it doesn't understand
+function read_cards {
+  local file="$1"
+  local line
+  local line_number=0
 
+  cards=()
+
+  while IFS= read -r line || [ -n "$line" ]; do
+    line_number=$(( line_number + 1 ))
+
+    # drop control characters (like the \r in CRLF line
+    # endings) so they can't mess with the terminal
+    line="${line//[[:cntrl:]]/}"
+
+    if [ -z "$line" ]; then
+      continue
+    fi
+
+    if [[ "$line" != *=* ]]; then
+      warn "Skipping line $line_number of $file because it isn't front=back"
+      continue
+    fi
+
+    cards+=("$line")
+  done < "$file"
+
+  return 0
+}
+
+# puts the cards in a random order (fisher-yates shuffle)
+function shuffle_cards {
+  local i
+  local j
+  local tmp
+
+  for (( i = ${#cards[@]} - 1; i > 0; i-- )); do
+    j=$(( RANDOM % (i + 1) ))
+    tmp="${cards[i]}"
+    cards[i]="${cards[j]}"
+    cards[j]="$tmp"
+  done
+
+  return 0
+}
+
+# shows every card in the deck, one side then the other
 function run_cards {
-  clearscreen
+  local cards_name="$1"
+  local i
+  local card
+  local front
+  local back
 
-  local cards_name=$1
-  eval "declare -A cards=""${2#*=}"
-  local -A updated_cards
+  shuffle_cards
 
-  local cards_keys=("${!cards[@]}")
-  local cards_keys_count=${#cards_keys[@]}
-  local random_cards_key_index="$(( RANDOM % cards_keys_count ))"
-  local random_cards_key="${cards_keys[$random_cards_key_index]}"
+  for (( i = 0; i < ${#cards[@]}; i++ )); do
+    card="${cards[i]}"
+    front="${card%%=*}"
+    back="${card#*=}"
 
-  local selected_key_val=("$random_cards_key" "${cards[$random_cards_key]}")
-  local random_selected_index="$(( RANDOM % 2 ))"
+    # randomly pick which side to show first
+    if [ "$(( RANDOM % 2 ))" -eq 1 ]; then
+      front="${card#*=}"
+      back="${card%%=*}"
+    fi
 
-  local front="${selected_key_val[$random_selected_index]}"
-  local front_length=${#front}
-  local front_hborder_length=$(( front_length + 6 ))
-  local front_vborder_length=$(( front_length + 4 ))
+    clearscreen
 
-  local back="${selected_key_val[$(( random_selected_index == 0 ? 1 : 0))]}"
-  local back_length=${#back}
-  local back_hborder_length=$(( back_length + 6 ))
-  local back_vborder_length=$(( back_length + 4 ))
+    # print cards name
+    printf '%s\n' "$cards_name"
 
-  # print cards name
-  local output_name
-  output_name="$(to_filename "$cards_name")"
-  echo "$output_name"
+    # print front
+    make_card "$front"
+    read -rp "(Press return to flip)" _ || goodbye
 
-  # print front
-  local output_front
-  output_front="$(make_card $front_hborder_length $front_vborder_length "$front")"
-  echo "$output_front"
+    # print back
+    make_card "$back"
 
-  read -rp "(Press return to flip)" _
-
-  # print back
-  local output_back
-  output_back="$(make_card $back_hborder_length $back_vborder_length "$back")"
-  echo "$output_back"
-
-  for key in "${!cards[@]}"; do
-    if [ "$key" != "$random_cards_key" ]; then
-      updated_cards["$key"]="${cards[$key]}"
+    if [ "$i" -lt "$(( ${#cards[@]} - 1 ))" ]; then
+      read -rp "(Press return for next card)" _ || goodbye
     fi
   done
 
-  if [[ ! -v updated_cards[@] ]]; then
-    echo ""
-    echo "All done!"
-    read -rp "(Press return to exit)" _
-    exit 0
-  else
-    read -rp "(Press return for next card)" _
-  fi
-
-  run_cards "$cards_name" "$(declare -p updated_cards)"
+  echo ""
+  echo "All done!"
+  read -rp "(Press return to exit)" _ || goodbye
 
   return 0
 }
 
 function select_file {
-  local msg="$1"
-  shift
   local files=("$@")
   local -a opts
+  local file
+  local i
+  local msg=""
+  local opt
+  local selected
 
   for file in "${files[@]}"; do
     opts+=("$(to_filename "$file")")
   done
 
-  clearscreen
-  echo "What would you like to practice?"
+  while true; do
+    clearscreen
+    echo "What would you like to practice?"
 
-  # list the files
-  for i in "${!opts[@]}"; do
-    echo "$((i+1)). ${opts[$i]}"
+    # list the files
+    for i in "${!opts[@]}"; do
+      echo "$((i+1)). ${opts[$i]}"
+    done
+
+    # if there's a feedback message,
+    # display that (like an error)
+    if [ -n "$msg" ]; then
+      echo "$msg"
+    fi
+
+    # get the input
+    read -rp "> " opt || goodbye
+
+    # make sure the option is in the list
+    if
+      [[ "$opt" =~ ^[0-9]+$ ]] &&
+      [ "${#opt}" -le 9 ] &&
+      [ "$(( 10#$opt ))" -ge 1 ] &&
+      [ "$(( 10#$opt ))" -le "${#files[@]}" ]
+    then
+      selected=$(( 10#$opt - 1 ))
+    else
+      msg="(Please select from the options)"
+      continue
+    fi
+
+    read_cards "${files[$selected]}"
+
+    if [ "${#cards[@]}" -eq 0 ]; then
+      msg="(${opts[$selected]} has no cards)"
+      continue
+    fi
+
+    run_cards "${opts[$selected]}"
+
+    return 0
   done
-
-  # if there's a feedback message,
-  # display that (like an error)
-  if [ -n "$msg" ]; then
-    echo "$msg"
-  fi
-
-  # get the input
-  read -rp "> " opt
-
-  # make sure the option is in
-  # the list and then continue
-  if
-    [[ "$opt" =~ ^[0-9]+$ ]] &&
-    [ "$opt" -gt 0 ] &&
-    [ "$opt" -lt $((${#files[@]} + 1)) ]
-  then
-    local selected_file="${files[$opt-1]}"
-    local -A cards
-
-    while IFS="=" read -r key value; do
-      cards["$key"]="$value"
-    done < "$selected_file"
-
-    run_cards "$selected_file" "$(declare -p cards)"
-  else
-    select_file "(Please select from the options)" "${files[@]}"
-  fi
-
-  return 0
 }
 
 function start {
+  local dir="$1"
   local -a files
 
-  if [ -d "$1" ]; then
-    for file in "$1"/*."$ext"; do
-      files+=("$file")
-    done
-
-    select_file "" "${files[@]}"
-
-    return 0
-  else
-    dir_not_found
+  if [ -z "$dir" ]; then
+    die "-d, --dir needs a DIRECTORY containing *.$ext files."
   fi
+
+  if [ ! -d "$dir" ]; then
+    die "Directory not found. Are you sure you typed it correctly?"
+  fi
+
+  check_locale
+
+  shopt -s nullglob
+  files=("$dir"/*."$ext")
+  shopt -u nullglob
+
+  if [ "${#files[@]}" -eq 0 ]; then
+    die "No *.$ext files found in $dir. Are you sure this is the right directory?"
+  fi
+
+  select_file "${files[@]}"
+
+  return 0
 }
 
 # Check if no command is provided
@@ -224,8 +296,8 @@ function start {
 # Determine command
 
 case "$1" in
-  -d|--dir    ) [[ -z "${2-}" ]] && dir_not_found; start "$2";;
+  -d|--dir    ) start "${2-}";;
   -h|--help   ) usage;;
-  -v|--version) version;;
+  -v|--version) print_version;;
              *) unknown-cmd;;
 esac
