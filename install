@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-set -o errexit
-set -o nounset
-set -o pipefail
+set -eou pipefail
 
 # which release to install, where to put it, and where to
 # download it from (point RAW_URL at a mirror or a fork to
