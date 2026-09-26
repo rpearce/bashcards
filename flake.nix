@@ -97,6 +97,9 @@
         default = pkgs.mkShell {
           inputsFrom = [ self.packages.${pkgs.stdenv.hostPlatform.system}.bashcards ];
           packages = with pkgs; [
+            # the package builds against non-interactive bash, so bring back
+            # the interactive one for running `bash` in this shell
+            bashInteractive
             bats
             mandoc
             shellcheck
